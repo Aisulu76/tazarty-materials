@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Учет материалов — Проект «Тазарту»</title>
 <link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -199,11 +200,17 @@
 
   <!-- Панель действий -->
   <section class="card action-panel">
+    <button type="button" class="btn btn-secondary" id="import-excel-btn">Импорт из Excel</button>
+    <input type="file" id="import-excel-input" accept=".xlsx,.xls,.csv" hidden>
     <button type="button" class="btn btn-secondary" id="export-csv-btn">Экспортировать CSV</button>
     <button type="button" class="btn btn-secondary" id="save-btn">Сохранить данные</button>
     <button type="button" class="btn btn-danger" id="clear-btn">Очистить данные</button>
     <span id="status-message" class="status-message" role="status"></span>
   </section>
+  <p class="empty-note" id="import-hint">
+    Ожидаемые колонки в файле: Проект, Район, Материал, Ед. измерения, Кол-во всего, Выдано, Использовано, МОЛ, Дата, Комментарий.
+    Порядок колонок не важен, лишние колонки игнорируются.
+  </p>
 
 </main>
 

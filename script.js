@@ -384,6 +384,112 @@
     return str;
   }
 
+  // ---------- Excel import ----------
+
+  const IMPORT_COLUMN_MAP = {
+    "проект": "project",
+    "район": "district",
+    "материал": "material",
+    "наименование материала": "material",
+    "ед": "unit",
+    "ед.": "unit",
+    "единица измерения": "unit",
+    "ед. измерения": "unit",
+    "количество всего": "total",
+    "кол-во всего": "total",
+    "всего": "total",
+    "количество выдано": "issued",
+    "выдано": "issued",
+    "количество использовано": "used",
+    "использовано": "used",
+    "мол": "responsible",
+    "ответственный": "responsible",
+    "дата": "date",
+    "комментарий": "comment",
+  };
+
+  function pad2(n) {
+    return String(n).padStart(2, "0");
+  }
+
+  function normalizeDate(value) {
+    if (value instanceof Date && !isNaN(value)) {
+      return `${value.getFullYear()}-${pad2(value.getMonth() + 1)}-${pad2(value.getDate())}`;
+    }
+    const str = String(value ?? "").trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+    const dmy = str.match(/^(\d{1,2})[.\/](\d{1,2})[.\/](\d{4})$/);
+    if (dmy) return `${dmy[3]}-${pad2(dmy[2])}-${pad2(dmy[1])}`;
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function mapImportedRow(row) {
+    const normalized = {};
+    Object.keys(row).forEach((key) => {
+      const cleanKey = key.trim().toLowerCase();
+      const field = IMPORT_COLUMN_MAP[cleanKey];
+      if (field) normalized[field] = row[key];
+    });
+
+    const district = String(normalized.district || "").trim();
+    const material = String(normalized.material || "").trim();
+    if (!district || !material) return null;
+
+    return {
+      project: String(normalized.project || "").trim() || MAIN_PROJECT,
+      district,
+      material,
+      unit: String(normalized.unit || "").trim(),
+      total: num(normalized.total),
+      issued: num(normalized.issued),
+      used: num(normalized.used),
+      responsible: String(normalized.responsible || "").trim(),
+      date: normalizeDate(normalized.date),
+      comment: String(normalized.comment || "").trim(),
+    };
+  }
+
+  function importRows(rows) {
+    let added = 0;
+    let skipped = 0;
+    rows.forEach((row) => {
+      const rec = mapImportedRow(row);
+      if (!rec) {
+        skipped++;
+        return;
+      }
+      records.push({ id: uid(), ...rec });
+      added++;
+    });
+
+    persist();
+    renderAll();
+    showStatus(
+      `Импортировано записей: ${added}.` + (skipped ? ` Пропущено (нет района/материала): ${skipped}.` : "")
+    );
+  }
+
+  function handleExcelFile(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array", cellDates: true });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+        if (!rows.length) {
+          alert("Файл не содержит данных.");
+          return;
+        }
+        importRows(rows);
+      } catch (err) {
+        alert("Не удалось прочитать файл: " + err.message);
+      }
+    };
+    reader.onerror = () => alert("Не удалось прочитать файл.");
+    reader.readAsArrayBuffer(file);
+  }
+
   // ---------- Event wiring ----------
 
   document.getElementById("material-form").addEventListener("submit", (e) => {
@@ -434,6 +540,16 @@
   });
 
   document.getElementById("export-csv-btn").addEventListener("click", exportCsv);
+
+  document.getElementById("import-excel-btn").addEventListener("click", () => {
+    document.getElementById("import-excel-input").click();
+  });
+
+  document.getElementById("import-excel-input").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (file) handleExcelFile(file);
+    e.target.value = "";
+  });
 
   document.getElementById("save-btn").addEventListener("click", () => {
     persist();
