@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Учет материалов — Проект «Тазарту»</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-inner">
+    <h1>Учет материалов — проект «Тазарту»</h1>
+    <p class="subtitle">АО «Казахтелеком» · закуп и распределение материалов по районам</p>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- Форма добавления -->
+  <section class="card" id="form-section">
+    <h2>Добавить / редактировать материал</h2>
+    <form id="material-form" class="material-form">
+      <input type="hidden" id="record-id">
+
+      <div class="field">
+        <label for="f-project">Проект</label>
+        <input type="text" id="f-project" list="project-list" value="Тазарту" required>
+        <datalist id="project-list"></datalist>
+      </div>
+
+      <div class="field">
+        <label for="f-district">Район</label>
+        <select id="f-district" required>
+          <option value="">— выберите —</option>
+          <option>Есиль</option>
+          <option>Сарыарка</option>
+          <option>Алматы</option>
+          <option>Байконур</option>
+          <option>Нура</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="f-area">Участок</label>
+        <input type="text" id="f-area" required>
+      </div>
+
+      <div class="field">
+        <label for="f-material">Материал</label>
+        <input type="text" id="f-material" list="material-list" required>
+        <datalist id="material-list"></datalist>
+      </div>
+
+      <div class="field">
+        <label for="f-unit">Ед. измерения</label>
+        <input type="text" id="f-unit" placeholder="шт, м, кг..." required>
+      </div>
+
+      <div class="field">
+        <label for="f-total">Кол-во всего</label>
+        <input type="number" id="f-total" min="0" step="any" required>
+      </div>
+
+      <div class="field">
+        <label for="f-issued">Выдано</label>
+        <input type="number" id="f-issued" min="0" step="any" required>
+      </div>
+
+      <div class="field">
+        <label for="f-used">Использовано</label>
+        <input type="number" id="f-used" min="0" step="any" required>
+      </div>
+
+      <div class="field">
+        <label for="f-responsible">Ответственный</label>
+        <input type="text" id="f-responsible" required>
+      </div>
+
+      <div class="field">
+        <label for="f-date">Дата</label>
+        <input type="date" id="f-date" required>
+      </div>
+
+      <div class="field field-wide">
+        <label for="f-comment">Комментарий</label>
+        <input type="text" id="f-comment">
+      </div>
+
+      <div class="field field-actions">
+        <button type="submit" class="btn btn-primary" id="submit-btn">Добавить материал</button>
+        <button type="button" class="btn btn-secondary" id="cancel-edit-btn" hidden>Отменить</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Фильтры -->
+  <section class="card" id="filters-section">
+    <h2>Фильтры</h2>
+    <div class="filters-grid">
+      <div class="field">
+        <label for="filter-project">Проект</label>
+        <select id="filter-project"><option value="">Все</option></select>
+      </div>
+      <div class="field">
+        <label for="filter-district">Район</label>
+        <select id="filter-district"><option value="">Все</option></select>
+      </div>
+      <div class="field">
+        <label for="filter-material">Материал</label>
+        <select id="filter-material"><option value="">Все</option></select>
+      </div>
+      <div class="field">
+        <label for="filter-responsible">Ответственный</label>
+        <select id="filter-responsible"><option value="">Все</option></select>
+      </div>
+      <div class="field">
+        <label for="filter-date">Дата</label>
+        <input type="date" id="filter-date">
+      </div>
+      <div class="field field-actions">
+        <button type="button" class="btn btn-secondary" id="reset-filters-btn">Сбросить</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Общая таблица -->
+  <section class="card">
+    <h2>Общая таблица материалов</h2>
+    <div class="table-wrap">
+      <table id="main-table">
+        <thead>
+          <tr>
+            <th>Проект</th>
+            <th>Район</th>
+            <th>Участок</th>
+            <th>Материал</th>
+            <th>Ед.</th>
+            <th>Всего</th>
+            <th>Выдано</th>
+            <th>Использовано</th>
+            <th>Остаток</th>
+            <th>Ответственный</th>
+            <th>Дата</th>
+            <th>Комментарий</th>
+            <th>Действия</th>
+          </tr>
+        </thead>
+        <tbody id="main-table-body"></tbody>
+      </table>
+      <p class="empty-note" id="main-table-empty">Нет записей. Добавьте первый материал через форму выше.</p>
+    </div>
+  </section>
+
+  <!-- Сводка по проекту Тазарту -->
+  <section class="card">
+    <h2>Сводка по проекту «Тазарту»</h2>
+    <div class="table-wrap">
+      <table id="summary-table">
+        <thead>
+          <tr>
+            <th>Материал</th>
+            <th>Ед.</th>
+            <th>Всего</th>
+            <th>Выдано</th>
+            <th>Использовано</th>
+            <th>Остаток</th>
+          </tr>
+        </thead>
+        <tbody id="summary-table-body"></tbody>
+        <tfoot id="summary-table-foot"></tfoot>
+      </table>
+      <p class="empty-note" id="summary-table-empty">Нет данных по проекту «Тазарту».</p>
+    </div>
+  </section>
+
+  <!-- Разбивка по районам -->
+  <section class="card">
+    <h2>Разбивка по районам (проект «Тазарту»)</h2>
+    <div id="districts-container" class="districts-grid"></div>
+  </section>
+
+  <!-- Легенда -->
+  <section class="card legend-card">
+    <h2>Легенда</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="dot dot-green"></span> Материал есть</div>
+      <div class="legend-item"><span class="dot dot-yellow"></span> Использован частично</div>
+      <div class="legend-item"><span class="dot dot-red"></span> Использовано больше, чем выдано</div>
+      <div class="legend-item"><span class="dot dot-gray"></span> Остаток = 0</div>
+    </div>
+  </section>
+
+  <!-- Панель действий -->
+  <section class="card action-panel">
+    <button type="button" class="btn btn-secondary" id="export-csv-btn">Экспортировать CSV</button>
+    <button type="button" class="btn btn-secondary" id="save-btn">Сохранить данные</button>
+    <button type="button" class="btn btn-danger" id="clear-btn">Очистить данные</button>
+    <span id="status-message" class="status-message" role="status"></span>
+  </section>
+
+</main>
+
+<footer class="app-footer">
+  <p>Данные хранятся локально в вашем браузере (LocalStorage) и не передаются на сервер.</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
