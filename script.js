@@ -169,7 +169,6 @@
       tr.innerHTML = `
         <td>${escapeHtml(rec.project)}</td>
         <td>${escapeHtml(rec.district)}</td>
-        <td>${escapeHtml(rec.area)}</td>
         <td>${escapeHtml(rec.material)}</td>
         <td>${escapeHtml(rec.unit)}</td>
         <td>${fmt(rec.total)}</td>
@@ -296,7 +295,6 @@
     return {
       project: document.getElementById("f-project").value.trim(),
       district: document.getElementById("f-district").value,
-      area: document.getElementById("f-area").value.trim(),
       material: document.getElementById("f-material").value.trim(),
       unit: document.getElementById("f-unit").value.trim(),
       total: num(document.getElementById("f-total").value),
@@ -324,7 +322,6 @@
     document.getElementById("record-id").value = id;
     document.getElementById("f-project").value = rec.project;
     document.getElementById("f-district").value = rec.district;
-    document.getElementById("f-area").value = rec.area;
     document.getElementById("f-material").value = rec.material;
     document.getElementById("f-unit").value = rec.unit;
     document.getElementById("f-total").value = rec.total;
@@ -351,15 +348,15 @@
 
   function exportCsv() {
     const headers = [
-      "Проект", "Район", "Участок", "Материал", "Ед. измерения",
+      "Проект", "Район", "Материал", "Ед. измерения",
       "Кол-во всего", "Выдано", "Использовано", "Остаток",
-      "Ответственный", "Дата", "Комментарий",
+      "МОЛ", "Дата", "Комментарий",
     ];
     const lines = [headers.join(",")];
 
     records.forEach((rec) => {
       const row = [
-        rec.project, rec.district, rec.area, rec.material, rec.unit,
+        rec.project, rec.district, rec.material, rec.unit,
         fmt(rec.total), fmt(rec.issued), fmt(rec.used), fmt(remainder(rec)),
         rec.responsible, rec.date, rec.comment,
       ].map(csvEscape);
